@@ -142,7 +142,7 @@ class main(object):
         for i in a:
             if i['Type'] in l:
                 ll.append(i)
-        ro = randint(0,len(l)-1)
+        ro = randint(0,len(ll)-1)
         dd = ll[ro]
         try:
             dd['Name']
