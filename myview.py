@@ -49,7 +49,7 @@ class InputFrame(Frame):
                 return
             ask = t1.get(1.0, END)
             answer = t2.get(1.0, END)
-            data = 'S##%s##%s##%s##%s' % (type1, name, ask, answer)
+            data = 'S##%s##%s##%s##%s' % (type1, name1, ask, answer)
             s.send(data.encode())
             data = s.recv(128).decode()
             if data == 'OK':
