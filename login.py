@@ -106,10 +106,13 @@ class Login_page(object):
         passwd = self.password.get()
         data = 'I##%s##%s'%(name,passwd)
         self.s.send(data.encode())
-        data = self.s.recv(128).decode()
-        if data=='OK':
+        data2 = self.s.recv(128).decode()
+        data = data2.split('##')
+        if data[0]=='OK':
+            name = data[1]
+            print(name)
             self.update(self.s)
             self.page.destroy()
-            Main_page(self.root,self.s)
+            Main_page(self.root,self.s,name)
         else:
-            showinfo(title='error', message='%s'%data)
+            showinfo(title='error', message=data[1])

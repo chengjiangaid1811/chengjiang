@@ -41,6 +41,7 @@ class main(object):
         while True:
             data = c.recv(1024).decode()
             if not data:
+                c.close()
                 sys.exit('客户端退出')
             l = data.split('##')
             if l[0] == 'S':
@@ -55,6 +56,17 @@ class main(object):
                 self.do_register(c,l)
             elif l[0] == 'I':
                 self.do_login(c,l)
+            elif l[0] == 'A':
+                self.sendtype(c)
+    def sendtype(self,c):
+        conn = MongoClient('localhost', 27017)
+        db = conn['text']
+        myset = db['season2']
+        a = myset.distinct("Type")
+        data = '##'.join(a)
+        c.send(data.encode())
+
+
 
     def do_login(self,c,l):
         c_id = l[1]
@@ -65,10 +77,11 @@ class main(object):
         a = myset.find({})
         for i in a:
             if i['id'] == c_id and i['passw'] == c_passw:
-                c.send(b'OK')
+                data = 'OK##'+i['name']
+                c.send(data.encode())
                 return
         else:
-            msg = '账号或密码不正确'
+            msg = 'ER##账号或密码不正确'
             c.send(msg.encode())
 
 
@@ -114,16 +127,23 @@ class main(object):
         data = self.file_no
         c.send(data.encode())
 
-    def db_load(self,c,status):
+    def db_load(self,c,l1):
+        if l1[-1] == '':
+            data = '未选择类型范围##未选择类型范围##无围##无名'
+            c.send(data.encode())
+            return
+        else:
+            l = l1[1:]
         conn = MongoClient('localhost', 27017)
         db = conn['text']
         myset = db['season2']
         a = myset.find({})
-        l=[]
+        ll = []
         for i in a:
-            l.append(i)
+            if i['Type'] in l:
+                ll.append(i)
         ro = randint(0,len(l)-1)
-        dd = l[ro]
+        dd = ll[ro]
         try:
             dd['Name']
         except:
@@ -169,7 +189,7 @@ class main(object):
 
 if __name__ == '__main__':
     HOST = '0.0.0.0'
-    file_no = '5.0'
+    file_no = '5.1'
     PORT = 8888
     ADDR = (HOST, PORT)
     main(ADDR,file_no)

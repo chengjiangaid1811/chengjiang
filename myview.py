@@ -30,30 +30,26 @@ class Do_random(Frame):
 
 
 class InputFrame(Frame):
-    def __init__(self, master, s):
+    def __init__(self, master, s,name,list1):
         Frame.__init__(self, master)
         self.s = s
-        self.create_page()
+        self.create_page(name,list1)
 
-    def create_page(self):
+
+    def create_page(self,name1,list1):
         name = StringVar()
-        name.set('--上传者姓名--')
-
+        name.set('录入者:%s'%name1)
         type = StringVar()
         type.set('--输入新的类型--')
 
         def save(s):
             type1 = c.get()
-            name1 = name.get()
             if type1 == '--输入新的类型--':
                 showerror('error', '请选择题目类型...')
                 return
-            elif name1 == '--上传者姓名--':
-                showerror('error', '输入大名')
-                return
             ask = t1.get(1.0, END)
             answer = t2.get(1.0, END)
-            data = 'S##%s##%s##%s##%s' % (type1, name1, ask, answer)
+            data = 'S##%s##%s##%s##%s' % (type1, name, ask, answer)
             s.send(data.encode())
             data = s.recv(128).decode()
             if data == 'OK':
@@ -67,7 +63,8 @@ class InputFrame(Frame):
 
 
         def create_type():
-            showinfo('error','功能等待完善')
+            showinfo('额','把左边类型栏内容删除写上新东西即可...\n ps:新类型重启软件后下拉菜单可见')
+
 
         t1 = Text(self, height=5, width=80)
         t1.grid(row=2, columnspan=4)
@@ -78,20 +75,20 @@ class InputFrame(Frame):
         t2.insert(INSERT, '填入答案')
 
         c = ttk.Combobox(self, textvariable=type)
-        c['values'] = ['1.网络编程', '2.进程线程', '3.MySQL基础', '4.MongDB', '5.正则表达式', '6.git']
+        c['values'] = list1
         c.grid(row=0, sticky=W)
-        Entry(self, textvariable=name).grid(row=0, column=1)
+        Label(self, textvariable=name).grid(row=0, column=1)
         Button(self, text='存入题库', command=lambda s=None: save(self.s)).grid(row=0, column=2)
         Button(self, text='新建题型', command=create_type).grid(row=0, column=3)
 
 
 class QueryFrame(Frame):
-    def __init__(self, master, s):
+    def __init__(self, master, s,name,list1):
         Frame.__init__(self, master)
         self.s = s
-        self.create_page()
+        self.create_page(name,list1)
 
-    def create_page(self):
+    def create_page(self,name1,list1):
         group = StringVar()
         group.set('填入类型')
         flag = 1
@@ -103,7 +100,16 @@ class QueryFrame(Frame):
         def ask(s):
             nonlocal flag
             if flag == 1:
-                data = 'L##%s' % group.get()
+                list4 = []
+                l2 = []
+                for j in list2:
+                    l2.append(j.get())
+                list3 = iter(l2)
+                for i in list1:
+                    p = next(list3)
+                    if p == 1:
+                        list4.append(i)
+                data = 'L##'+'##'.join(list4)
                 s.send(data.encode())
                 data = s.recv(1024).decode()
                 self.l = data.split('##')
@@ -119,9 +125,17 @@ class QueryFrame(Frame):
                 t1.tag_add('answer', '1.0', END)
                 t1.tag_config('answer', font=('Calibri', 12))
                 flag = 1
+        list2 = []
+        n=2
+        for i in list1:
+            list2.append(IntVar())
+            b = Checkbutton(self,text=i,variable=list2[-1])
+            b.grid(row=n,column=0,sticky=W)
+            n += 1
 
         t1 = Text(self, height=30, width=80)
-        t1.grid(row=2, column=1, columnspan=4)
+        t1.grid(row=2, column=1, rowspan=20,columnspan=4)
+        Label(self,pady='10').grid(row=1, column=0)
         Label(self, textvariable=type, pady='10').grid(row=1, column=2)
         Label(self, textvariable=name, pady='10').grid(row=1, column=3)
         Button(self, text='随机抽题', command=lambda s=None: ask(self.s)).grid(row=1, column=1)

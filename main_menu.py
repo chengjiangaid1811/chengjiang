@@ -4,17 +4,24 @@ from myview import *
 
 
 
-class Main_page(object,):
-    def __init__(self, master=None,s=None):
+class Main_page(object):
+    def __init__(self, master,s,name):
         self.s = s
         self.root = master
         self.root.geometry('800x600')
         self.root.title('main')
-        self.create_page()
+        self.get_typelist()
+        self.create_page(name)
 
-    def create_page(self):
-        self.input_page = InputFrame(self.root,self.s)
-        self.query_page = QueryFrame(self.root,self.s)
+    def get_typelist(self):
+        data1 = 'A'
+        self.s.send(data1.encode())
+        data2 = self.s.recv(1024).decode()
+        self.list1 = data2.split('##')
+
+    def create_page(self,name):
+        self.input_page = InputFrame(self.root,self.s,name,self.list1)
+        self.query_page = QueryFrame(self.root,self.s,name,self.list1)
         self.count_page = CountFrame(self.root,self.s)
         self.about_page = AboutFrame(self.root,self.s)
         self.do_random_page =Do_random(self.root)
