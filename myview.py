@@ -71,11 +71,8 @@ class InputFrame(Frame):
             else:
                 showerror('有bug！','%s'%data)
 
-
-
         def create_type():
             showinfo('额','把左边类型栏内容删除写上新东西即可...\n ps:新类型重启软件后下拉菜单可见')
-
 
         t1 = Text(self, height=5, width=80)
         t1.grid(row=2, columnspan=4)
@@ -94,19 +91,21 @@ class InputFrame(Frame):
 
 
 class QueryFrame(Frame):
-    def __init__(self, master, s,name,list1):
+    def __init__(self, master, s,name):
         Frame.__init__(self, master)
+        self.usrname = name
         self.s = s
-        self.create_page(name,list1)
+        self.create_page()
 
-    def create_page(self,name_user,list1):
-        group = StringVar()
-        group.set('填入类型')
+    def create_page(self):
         flag = 2
+        data1 = 'A'
+        self.s.send(data1.encode())
+        data2 = self.s.recv(1024).decode()
+        list1 = data2.split('##')
         type = StringVar()
-        type.set('--题目类型--')
         name = StringVar()
-        name.set('--上传人--')
+
 
         def ask(s):
             nonlocal flag
@@ -126,22 +125,25 @@ class QueryFrame(Frame):
                 data = s.recv(4096).decode()
                 self.l = data.split('##')
                 t1.delete(1.0, END)
-                data_ask='上传者：%s                 题目类型:%s\n\n'%(self.l[3],self.l[2])+self.l[0]
-                t1.insert(INSERT, '%s' %data_ask)
+                t2.delete(1.0, END)
+                name.set(self.l[3])
+                type.set(self.l[2])
+                t1.insert(INSERT, '%s' %self.l[0])
                 t1.tag_add('answer', '1.0', END)
                 t1.tag_config('answer', font=('Calibri', 12))
                 flag = 0
             else:
-                t1.insert(INSERT, '%s' % self.l[1])
-                t1.tag_add('answer', '1.0', END)
-                t1.tag_config('answer', font=('Calibri', 12))
+                t2.delete(1.0, END)
+                t2.insert(INSERT, '%s' % self.l[1])
+                t2.tag_add('answer', '1.0', END)
+                t2.tag_config('answer', font=('Calibri', 12))
                 flag = 1
 
         def deltest(s,l):
             if flag == 2 or flag == 0:
-                showerror("error","请将答案展示后再删除")
+                showerror("error","请将答案展示后再上传编辑")
                 return
-            elif l[3] == name_user or name_user == "admin":
+            elif l[3] == self.usrname or self.usrname == "admin":
                 data = "D##" + l[0]
             else:
                 choo = askokcancel("error","非上传者或管理员无法删除或修改题库\n是否标记该题目有误?")
@@ -152,20 +154,56 @@ class QueryFrame(Frame):
             s.send(data.encode())
             showinfo("","已发送请求")
 
+        def update(s,l):
+            if flag == 2 or flag == 0:
+                showerror("error","请将答案展示后再删除")
+                return
+            elif l[3] == self.usrname or self.usrname == "admin":
+                data = "D##" + l[0]
+                s.send(data.encode())
+            else:
+                choo = askokcancel("error","非上传者或管理员无法修改题库\n是否标记该题目有误?")
+                if choo == True:
+                    data = "M##" + l[0]
+                    s.send(data.encode())
+                    return
+                else:
+                    return
+            name1 = name.get()
+            type1 = type.get()
+            ask1 = t1.get(1.0, END)
+            answer1 = t2.get(1.0, END)
+            data = 'S##%s##%s##%s##%s' % (type1, name1, ask1, answer1)
+            s.send(data.encode())
+            data = s.recv(128).decode()
+            if data == 'OK':
+                showinfo('感谢您', '题目修改成功！')
+                self.create_page()
+            else:
+                showinfo('error', '%s'%data)
+                self.create_page()
 
+        fr1 = Frame(self)
+        fr1.grid(row=4,rowspan=6,sticky=NW)
         list2 = []
         n=2
         for i in list1:
             list2.append(IntVar())
-            b = Checkbutton(self,text=i,variable=list2[-1])
+            b = Checkbutton(fr1,text=i,variable=list2[-1])
             b.grid(row=n,column=0,sticky=W)
             n += 1
-        t1 = Text(self, height=30, width=80)
-        t1.grid(row=2, column=1, rowspan=20,columnspan=4)
-        Label(self,pady='10').grid(row=1, column=0)
-        Button(self,text="删除题目",command=lambda s=None: deltest(self.s,self.l)).grid(row=1, column=2)
-        Button(self, text="修改题目").grid(row=1, column=3)
-        Button(self, text='随机抽题', command=lambda s=None: ask(self.s)).grid(row=1, column=1)
+        Label(self,text="上传者：").grid(sticky=E,row=3, column=1)
+        Label(self,text="题目类型：").grid(sticky=E,row=3, column=3)
+        Label(self).grid( row=2, column=3)
+        Entry(self,textvariable=name).grid(row=3, column=2,sticky=W)
+        Entry(self, textvariable=type).grid(row=3, column=4,sticky=W)
+        t1 = Text(self, height=6,width=80)
+        t1.grid(row=4, column=1, columnspan=4)
+        t2 = Text(self, height=20,width=80)
+        t2.grid(row=5, column=1, columnspan=4)
+        Button(self,text="删除题目",command=lambda s=None: deltest(self.s,self.l)).grid(row=1,column=2)
+        Button(self,text="修改题目",command=lambda s=None: update(self.s,self.l)).grid(row=1,column=3)
+        Button(self,text='随机抽题', command=lambda s=None: ask(self.s)).grid(row=1, column=1)
 
 
 class CountFrame(Frame):

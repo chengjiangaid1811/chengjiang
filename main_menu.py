@@ -10,18 +10,18 @@ class Main_page(object):
         self.root = master
         self.root.geometry('800x600')
         self.root.title('main')
-        self.get_typelist()
+        # self.get_typelist()
         self.create_page(name)
 
-    def get_typelist(self):
-        data1 = 'A'
-        self.s.send(data1.encode())
-        data2 = self.s.recv(1024).decode()
-        self.list1 = data2.split('##')
+    # def get_typelist(self):
+    #     data1 = 'A'
+    #     self.s.send(data1.encode())
+    #     data2 = self.s.recv(1024).decode()
+    #     self.list1 = data2.split('##')
 
     def create_page(self,name):
         self.input_page = InputFrame(self.root,self.s,name)
-        self.query_page = QueryFrame(self.root,self.s,name,self.list1)
+        self.query_page = QueryFrame(self.root,self.s,name)
         self.count_page = CountFrame(self.root,self.s)
         self.about_page = AboutFrame(self.root,self.s)
         self.do_random_page =Do_random(self.root)

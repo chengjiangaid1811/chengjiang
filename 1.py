@@ -195,23 +195,17 @@ class main(object):
         try:
             myset.insert_one({'Name':'%s'%l[2], 'Ask': '%s' % l[3],'Answer': '%s' % l[4],'Type': '%s' % l[1]})
             c.send(b'OK')
+            conn.close()
         except Exception as e:
             data = 'error:%s'%e
             c.send(data.encode())
-            return
-        a = myset.find({}, {'_id': 0})
-        for i in a:
-            try:
-                if i['Ask'] == l[3]:
-                    print('get!',l[3],i)
-            except:
-                pass
-        conn.close()
+            conn.close()
+
 
 
 if __name__ == '__main__':
     HOST = '0.0.0.0'
-    file_no = '5.4'
+    file_no = '5.5'
     PORT = 8888
     ADDR = (HOST, PORT)
     main(ADDR,file_no)

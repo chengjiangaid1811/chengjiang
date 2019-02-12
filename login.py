@@ -31,7 +31,6 @@ class Login_page(object):
         Button(self.page, text='退出', command=self.page.quit).grid(row=3, column=2, stick=E)
         Button(self.page, text='注册',command=self.register).grid(row=3, column=1)
 
-
     def register(self):
         def do_reg():
             if ' ' in id.get() or not id.get():
@@ -55,10 +54,6 @@ class Login_page(object):
                 regpage.destroy()
             else:
                 showinfo('error','%s'%data)
-
-
-
-
         regpage=Toplevel(self.root)
         regpage.title('注册')
         regpage.geometry('300x300')
@@ -79,9 +74,6 @@ class Login_page(object):
         Entry(regpage, textvariable=passw2, show='*').grid(row=4, column=2)
         Button(regpage, text='退出', command=regpage.destroy).grid(row=5, column=2)
         Button(regpage, text='注册', command=do_reg).grid(row=5, column=1)
-
-
-
 
     def update(self,s):
         data = 'U##%s'%self.file_no
