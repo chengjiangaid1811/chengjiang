@@ -39,7 +39,7 @@ class main(object):
         print('开启新进程：', c.getpeername())
         self.s.close()
         while True:
-            data = c.recv(1024).decode()
+            data = c.recv(4096).decode()
             if not data:
                 c.close()
                 sys.exit('客户端退出')
@@ -58,6 +58,20 @@ class main(object):
                 self.do_login(c,l)
             elif l[0] == 'A':
                 self.sendtype(c)
+            elif l[0] == 'M' or l[0] == "D":
+                self.mark_del(l)
+
+    def mark_del(self,l):
+        conn = MongoClient('localhost', 27017)
+        db = conn['text']
+        myset = db['season2']
+        if l[0] == "M":
+            myset.update_one({'Ask':'%s'%l[1]},{'$set':{'Mark':'1'}})
+        elif l[0] == 'D':
+            myset.delete_one({'Ask':'%s'%l[1]})
+        conn.close()
+
+
     def sendtype(self,c):
         conn = MongoClient('localhost', 27017)
         db = conn['text']
@@ -65,6 +79,7 @@ class main(object):
         a = myset.distinct("Type")
         data = '##'.join(a)
         c.send(data.encode())
+        conn.close()
 
 
 
@@ -79,10 +94,12 @@ class main(object):
             if i['id'] == c_id and i['passw'] == c_passw:
                 data = 'OK##'+i['name']
                 c.send(data.encode())
+                conn.close()
                 return
         else:
             msg = 'ER##账号或密码不正确'
             c.send(msg.encode())
+            conn.close()
 
 
 
@@ -142,6 +159,11 @@ class main(object):
         for i in a:
             if i['Type'] in l:
                 ll.append(i)
+        if ll == []:
+            data = '该题型已经没题了##该题型已经没题了##无形##无影'
+            c.send(data.encode())
+            return
+
         ro = randint(0,len(ll)-1)
         dd = ll[ro]
         try:
@@ -189,7 +211,7 @@ class main(object):
 
 if __name__ == '__main__':
     HOST = '0.0.0.0'
-    file_no = '5.3'
+    file_no = '5.4'
     PORT = 8888
     ADDR = (HOST, PORT)
     main(ADDR,file_no)

@@ -20,7 +20,7 @@ class Main_page(object):
         self.list1 = data2.split('##')
 
     def create_page(self,name):
-        self.input_page = InputFrame(self.root,self.s,name,self.list1)
+        self.input_page = InputFrame(self.root,self.s,name)
         self.query_page = QueryFrame(self.root,self.s,name,self.list1)
         self.count_page = CountFrame(self.root,self.s)
         self.about_page = AboutFrame(self.root,self.s)
