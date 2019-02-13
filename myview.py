@@ -174,7 +174,11 @@ class QueryFrame(Frame):
             type1 = type.get()
             ask1 = t1.get(1.0, END)
             answer1 = t2.get(1.0, END)
-            data = 'S##%s##%s##%s##%s' % (type1, self.usrname, ask1, answer1)
+            if self.usrname == 'admin':
+                newname = l[3]
+            else:
+                newname = self.usrname
+            data = 'S##%s##%s##%s##%s' % (type1, newname, ask1, answer1)
             s.send(data.encode())
             data = s.recv(128).decode()
             if data == 'OK':
