@@ -1,5 +1,5 @@
 # coding=utf-8
-#123
+
 from pymongo import MongoClient
 from socket import *
 from multiprocessing import *
@@ -44,9 +44,10 @@ class main(object):
                 c.close()
                 sys.exit('客户端退出')
             l = data.split('##')
+            print(l)
             if l[0] == 'S':
                 self.db_insert(c,l)
-            elif l[0] == 'L':
+            elif l[0] == '0' or l[0]=='1':
                 self.db_load(c,l)
             elif l[0] == 'U':
                 self.file_no_check(c,l)
@@ -68,7 +69,10 @@ class main(object):
         if l[0] == "M":
             myset.update_one({'Ask':'%s'%l[1]},{'$set':{'Mark':'1'}})
         elif l[0] == 'D':
-            myset.delete_one({'Ask':'%s'%l[1]})
+            if self.username == 'admin':
+                myset.delete_one({'Ask':'%s'%l[1]})
+            else:
+                myset.delete_one({'Ask': '%s' % l[1],'Name':'%s'%self.username})
         conn.close()
 
 
@@ -77,7 +81,14 @@ class main(object):
         db = conn['text']
         myset = db['season2']
         a = myset.distinct("Type")
-        data = '##'.join(a)
+        print('0',a)
+        if not a:
+            print('1',a)
+            data='无##题##型##请##录##入##吧'
+        else:
+            data = '##'.join(a)
+            print('2',a)
+        print(data)
         c.send(data.encode())
         conn.close()
 
@@ -93,6 +104,7 @@ class main(object):
         for i in a:
             if i['id'] == c_id and i['passw'] == c_passw:
                 data = 'OK##'+i['name']
+                self.username = i['name']
                 c.send(data.encode())
                 conn.close()
                 return
@@ -158,9 +170,13 @@ class main(object):
         ll = []
         for i in a:
             if i['Type'] in l:
-                ll.append(i)
+                if l1[0] == '0':
+                    ll.append(i)
+                else:
+                    if i['Name']== self.username:
+                        ll.append(i)
         if ll == []:
-            data = '该题型已经没题了##该题型已经没题了##无形##无影'
+            data = '经没题了##经没题了##无形##无影'
             c.send(data.encode())
             return
 
@@ -205,7 +221,7 @@ class main(object):
 
 if __name__ == '__main__':
     HOST = '0.0.0.0'
-    file_no = '5.5'
+    file_no = '5.6'
     PORT = 8888
     ADDR = (HOST, PORT)
     main(ADDR,file_no)

@@ -109,6 +109,7 @@ class QueryFrame(Frame):
 
         def ask(s):
             nonlocal flag
+            print(name2.get())
             if flag == 1 or flag == 2:
                 list4 = []
                 l2 = []
@@ -120,7 +121,8 @@ class QueryFrame(Frame):
                     p = next(list3)
                     if p == 1:
                         list4.append(i)
-                data = 'L##'+'##'.join(list4)
+
+                data = '%s##'%name2.get()+'##'.join(list4)
                 s.send(data.encode())
                 data = s.recv(4096).decode()
                 self.l = data.split('##')
@@ -169,11 +171,10 @@ class QueryFrame(Frame):
                     return
                 else:
                     return
-            name1 = name.get()
             type1 = type.get()
             ask1 = t1.get(1.0, END)
             answer1 = t2.get(1.0, END)
-            data = 'S##%s##%s##%s##%s' % (type1, name1, ask1, answer1)
+            data = 'S##%s##%s##%s##%s' % (type1, self.usrname, ask1, answer1)
             s.send(data.encode())
             data = s.recv(128).decode()
             if data == 'OK':
@@ -195,12 +196,14 @@ class QueryFrame(Frame):
         Label(self,text="上传者：").grid(sticky=E,row=3, column=1)
         Label(self,text="题目类型：").grid(sticky=E,row=3, column=3)
         Label(self).grid( row=2, column=3)
+        name2=IntVar()
+        Checkbutton(self, text='只抽我的题库', variable=name2).grid(row=3, column=5)
         Entry(self,textvariable=name).grid(row=3, column=2,sticky=W)
         Entry(self, textvariable=type).grid(row=3, column=4,sticky=W)
         t1 = Text(self, height=6,width=80)
-        t1.grid(row=4, column=1, columnspan=4)
+        t1.grid(row=4, column=1, columnspan=5)
         t2 = Text(self, height=20,width=80)
-        t2.grid(row=5, column=1, columnspan=4)
+        t2.grid(row=5, column=1, columnspan=5)
         Button(self,text="删除题目",command=lambda s=None: deltest(self.s,self.l)).grid(row=1,column=2)
         Button(self,text="修改题目",command=lambda s=None: update(self.s,self.l)).grid(row=1,column=3)
         Button(self,text='随机抽题', command=lambda s=None: ask(self.s)).grid(row=1, column=1)

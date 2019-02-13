@@ -102,7 +102,7 @@ class Login_page(object):
         data = data2.split('##')
         if data[0]=='OK':
             name = data[1]
-            print(name)
+            print('登录成功')
             self.update(self.s)
             self.page.destroy()
             Main_page(self.root,self.s,name)
